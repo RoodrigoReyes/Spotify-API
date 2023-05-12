@@ -58,7 +58,7 @@ El proyecto tiene la siguiente estructura de archivos:
 project/
 │
 ├── api_data/
-│   ├── <current-data YYYY-MM-DD>/
+│   ├── <current-date YYYY-MM-DD>/
 │        ├── <playlists-names>/
 │            ├── parquet_data/
 │            └── raw_data/
