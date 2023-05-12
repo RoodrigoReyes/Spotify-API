@@ -1,17 +1,11 @@
 from classes.spotify import SpotifyAPI
+from classes import dev
 
 spotify = SpotifyAPI()
 
 
-def extract_playlist_data(playlist_url: str) -> None:
-    # Obteniendo ID del link de la Playlist
-    ID = playlist_url.split("/")[-1].split("?")[0]
-
-    # Datos de las canciones que tienen la playlist a buscar por ID
-    spotify.get_playlist_data(playlist_id=ID)
-
-
 if __name__ == "__main__":
+    # URL's de diversas Playlist a ejecutar
     urls = [
         "https://open.spotify.com/playlist/1jRjHPZ1H4fX3LU81FkwWR?si=e5f0577b120a4c92",
         "https://open.spotify.com/playlist/1pN3ATrNrMf8lbf0TFV5m5?si=45a4bfcf11464421",
@@ -21,4 +15,8 @@ if __name__ == "__main__":
     ]
 
     for url in urls:
-        extract_playlist_data(playlist_url=url)
+        # Datos de las canciones que tienen la playlist a buscar por ID
+        playlist_id = dev.get_id_playlist(playlist_url=url)
+
+        # Extraer data de Playlist
+        spotify.get_playlist_data(playlist_id=playlist_id)
