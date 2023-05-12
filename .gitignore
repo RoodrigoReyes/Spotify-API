@@ -2,3 +2,4 @@ venv/
 .cache
 api_data/
 credentials/
+__pycache__/
