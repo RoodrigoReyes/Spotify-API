@@ -1,33 +1,46 @@
-# Spotify API
+# API de Spotify
 
-This project consists of a Python module that provides a simplified interface to the Spotify Web API, which allows the retrieval of various data about songs, artists, albums, and playlists. The `SpotifyAPI` class provides methods to retrieve audio features and playlist information, as well as all the tracks in a given playlist. The retrieved data can be saved in raw JSON and Parquet formats for further processing.
+Este proyecto consiste en un módulo de Python que proporciona una interfaz simplificada para la API web de Spotify, lo que permite la recuperación de varios datos sobre canciones, artistas, álbumes y listas de reproducción. La clase `SpotifyAPI` proporciona métodos para recuperar características de audio e información de listas de reproducción, así como todas las canciones en una lista de reproducción determinada. Los datos recuperados pueden guardarse en formatos JSON y Parquet sin procesar para su posterior procesamiento.
 
-## Dependencies
+## Dependencias
 
-This project requires the following dependencies to be installed:
+Este proyecto requiere que se instalen las siguientes dependencias:
 
 - `pandas`
 - `spotipy`
 
-## Usage
+## Configuración
 
-To use the `SpotifyAPI` class, you need to create an instance of it and then call its methods. The following methods are available:
+Para usar la API de Spotify, se necesita un `client_id` y un `client_secret` que se pueden obtener al crear una aplicación en [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/). Estos valores se pueden proporcionar como variables de entorno o guardar en un archivo JSON. Si se opta por la opción de archivo JSON, se debe crear un archivo llamado `secret.json` dentro de un directorio llamado `credentials`. El formato del archivo es el siguiente:
 
-- `get_audio_features(song_id: Union[str, List[str]]) -> Dict`: retrieves the audio features of a song given its Spotify ID. If multiple IDs are provided as a list, a list of dictionaries with the features of each song will be returned.
-- `get_playlist_info(playlist_id: str, user: str = None, fields: List[str] = None) -> Dict`: retrieves information about a playlist given its Spotify ID.
-- `get_playlist_data(playlist_id: str) -> None`: retrieves all the tracks in a playlist given its Spotify ID. 
+```json
+{
+  "Spotify": {
+    "CLIENT_ID": "your-client-id",
+    "CLIENT_SECRET": "your-client-secret"
+  }
+}
+```
 
-For example, to retrieve the audio features of a single song:
+## Uso
+
+Para usar la clase `SpotifyAPI`, es necesario crear una instancia de la misma y luego llamar a sus métodos. Los siguientes métodos están disponibles:
+
+- `get_audio_features(song_id: Union[str, List[str]]) -> Dict`: recupera las características de audio de una canción dada su identificación de Spotify. Si se proporcionan múltiples identificaciones como una lista, se devolverá una lista de diccionarios con las características de cada canción.
+- `get_playlist_info(playlist_id: str, user: str = None, fields: List[str] = None) -> Dict`: recupera información sobre una lista de reproducción dada su identificación de Spotify.
+- `get_playlist_data(playlist_id: str) -> None`: recupera todas las canciones en una lista de reproducción dada su identificación de Spotify.
+
+Por ejemplo, para recuperar las características de audio de una sola canción:
 
 ```python
 from classes.spotify import SpotifyAPI
 
 spotify = SpotifyAPI()
-song_uri = "https://open.spotify.com/playlist/1jRjHPZ1H4fX3LU81FkwWR?si=e5f0577b120a4c92"
-audio_features = spotify.get_audio_features(song_uri)
+song_id = "https://open.spotify.com/playlist/1jRjHPZ1H4fX3LU81FkwWR?si=e5f0577b120a4c92"
+audio_features = spotify.get_audio_features(song_id)
 ```
 
-To retrieve all the tracks in a playlist and save the raw data in JSON format and model data in PARQUET format:
+Para recuperar todas las canciones en una lista de reproducción y guardar los datos sin procesar en formato JSON y los datos del modelo en formato PARQUET:
 
 ```python
 from classes.spotify import SpotifyAPI
@@ -37,9 +50,9 @@ playlist_id = "https://open.spotify.com/playlist/1jRjHPZ1H4fX3LU81FkwWR?si=e5f05
 spotify.get_playlist_data(playlist_id)
 ```
 
-## File Structure
+## Estructura de archivos
 
-The project has the following file structure:
+El proyecto tiene la siguiente estructura de archivos:
 
 ```
 project/
@@ -63,8 +76,8 @@ project/
 └── requirements.txt
 ```
 
-- `classes/`: contains the `SpotifyAPI` class, as well as other utility classes and functions.
-- `credentials/secret.json`: contains the Spotify API credentials (client ID and client secret).
-- `.gitignore`: specifies files and directories to be ignored by Git.
-- `README.md`: this file.
-- `requirements.txt`: specifies the Python dependencies required by the project.
+- `classes/`: contiene la clase `SpotifyAPI`, así como otras clases y funciones de utilidad.
+- `credentials/secret.json`: contiene las credenciales de la API de Spotify (ID de cliente y secreto de cliente).
+- `.gitignore`: especifica los archivos y directorios que deben ser ignorados por Git.
+- `README.md`: este archivo.
+- `requirements.txt`: especifica las dependencias de Python requeridas por el proyecto.
