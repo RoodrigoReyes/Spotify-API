@@ -35,24 +35,24 @@ class SpotifyAPI:
 
     def get_audio_features(
         self,
-        song_uri: Union[str, List[str]],
+        song_id: Union[str, List[str]],
         ) -> Dict:  # fmt: skip
         """
         Obtiene las características de audio de una canción de Spotify.
 
         Parameters:
-            song_uri Union[List[List[str]], str]: URI o URI's de la canción de Spotify.
+            song_id Union[List[List[str]], str]: ID o ID's de la canción de Spotify.
 
         Returns:
             Diccionario con las características de audio de la canción.
         """
 
-        if isinstance(song_uri, str):
-            # Si song_uri es un string retornar resultado
-            return self.__sp.audio_features(tracks=song_uri)
+        if isinstance(song_id, str):
+            # Si song_id es un string retornar resultado
+            return self.__sp.audio_features(tracks=song_id)
 
         # Dividir la lista de canciones en sublistas de máximo 100 elementos
-        sublists = [song_uri[i : i + 100] for i in range(0, len(song_uri), 100)]
+        sublists = [song_id[i : i + 100] for i in range(0, len(song_id), 100)]
 
         # Llamar a la función audio_features para cada sublista y concatenar las listas resultantes
         audio_features_list = [
@@ -73,7 +73,7 @@ class SpotifyAPI:
         Obtiene información sobre una playlist de Spotify.
 
         Parameters:
-            playlist_id (str): URI de la playlist de Spotify.
+            playlist_id (str): ID de la playlist de Spotify.
             user (str): Nombre de usuario del propietario de la playlist.
             fields (List[str]): Lista de campos de la playlist que se deben devolver.
 
@@ -84,12 +84,12 @@ class SpotifyAPI:
             user=user, playlist_id=playlist_id, fields=fields
         )
 
-    def get_playlist_data(self, playlist_id: str) -> Tuple[List[Dict], str]:
+    def get_playlist_data(self, playlist_id: str) -> None:
         """
         Recupera todos los tracks de una playlist de Spotify.
 
         Parameters:
-            playlist_id (str): URI de la playlist de Spotify.
+            playlist_id (str): ID de la playlist de Spotify.
 
         Returns:
             Lista con todos los tracks de la playlist.
@@ -172,7 +172,7 @@ class SpotifyAPI:
 
         # Obteniendo las características de cada canción
         # que se encuentra en la playlist
-        songs_features = self.get_audio_features(song_uri=song_df["song_id"])
+        songs_features = self.get_audio_features(song_id=song_df["song_id"])
         songs_features_df = pd.DataFrame(songs_features)
 
         # Guardando archivos
