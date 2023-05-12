@@ -1,1 +1,4 @@
 venv/ 
+.cache
+api_data/
+credentials/
