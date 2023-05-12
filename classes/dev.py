@@ -2,7 +2,21 @@ import json
 from pathlib import Path
 from typing import Dict, List
 
-import pandas as pd
+
+def get_id_playlist(playlist_url: str) -> str:
+    """
+    Obtener ID de la Playlist a traves de su url
+
+    Parameters:
+        playlist_url (str): Url de acceso a la Playlist.
+
+    Returns:
+        id (str): Id de la Playlist.
+    """
+    # Obteniendo ID del link de la Playlist
+    id = playlist_url.split("/")[-1].split("?")[0]
+
+    return id
 
 
 def create_directory(directory_path: str, subdirectory_name: str = None) -> str:
@@ -19,7 +33,6 @@ def create_directory(directory_path: str, subdirectory_name: str = None) -> str:
     # Crea el directorio principal
     Path(directory_path).mkdir(parents=True, exist_ok=True)
 
-    # Si se especificó una fecha, crea un subdirectorio con el nombre de la fecha dentro del subdirectorio principal
     # Si se especificó un nombre para el subdirectorio, crea el subdirectorio
     if subdirectory_name:
         subdirectory_path = f"{directory_path}/{subdirectory_name}"
