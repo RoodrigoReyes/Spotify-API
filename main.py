@@ -1,13 +1,14 @@
 from classes.spotify import SpotifyAPI
 
-spotify_class = SpotifyAPI()
+spotify = SpotifyAPI()
 
 
 def extract_playlist_data(playlist_url: str) -> None:
+    # Obteniendo ID del link de la Playlist
     ID = playlist_url.split("/")[-1].split("?")[0]
 
     # Datos de las canciones que tienen la playlist a buscar por ID
-    spotify_class.get_playlist_data(playlist_id=ID)
+    spotify.get_playlist_data(playlist_id=ID)
 
 
 if __name__ == "__main__":
