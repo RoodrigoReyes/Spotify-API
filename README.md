@@ -26,9 +26,9 @@ Para usar la API de Spotify, se necesita un `client_id` y un `client_secret` que
 
 Para usar la clase `SpotifyAPI`, es necesario crear una instancia de la misma y luego llamar a sus métodos. Los siguientes métodos están disponibles:
 
-- `get_audio_features(song_id: Union[str, List[str]]) -> Dict`: recupera las características de audio de una canción dada su identificación de Spotify. Si se proporcionan múltiples identificaciones como una lista, se devolverá una lista de diccionarios con las características de cada canción.
-- `get_playlist_info(playlist_id: str, user: str = None, fields: List[str] = None) -> Dict`: recupera información sobre una lista de reproducción dada su identificación de Spotify.
 - `get_playlist_data(playlist_id: str) -> None`: recupera todas las canciones en una lista de reproducción dada su identificación de Spotify.
+- `get_playlist_info(playlist_id: str, user: str = None, fields: List[str] = None) -> Dict`: recupera información sobre una lista de reproducción dada su identificación de Spotify.
+- `get_audio_features(song_id: Union[str, List[str]]) -> Dict`: recupera las características de audio de una canción dada su identificación de Spotify. Si se proporcionan múltiples identificaciones como una lista, se devolverá una lista de diccionarios con las características de cada canción.
 
 Por ejemplo, para recuperar las características de audio de una sola canción:
 
