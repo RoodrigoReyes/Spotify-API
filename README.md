@@ -1,4 +1,4 @@
-# API de Spotify
+# Extraccion datos API Spotify
 
 Este proyecto consiste en un módulo de Python que proporciona una interfaz simplificada para la API web de Spotify, lo que permite la recuperación de varios datos sobre canciones, artistas, álbumes y listas de reproducción. La clase `SpotifyAPI` proporciona métodos para recuperar características de audio e información de listas de reproducción, así como todas las canciones en una lista de reproducción determinada. Los datos recuperados pueden guardarse en formatos JSON y Parquet sin procesar para su posterior procesamiento.
 
