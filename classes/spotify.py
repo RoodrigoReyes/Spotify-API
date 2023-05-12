@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Union, Tuple
+from typing import Dict, List, Union
 
 import pandas as pd
 import spotipy
