@@ -3,3 +3,4 @@ venv/
 api_data/
 credentials/
 __pycache__/
+*.ipynb
