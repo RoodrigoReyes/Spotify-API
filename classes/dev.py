@@ -1,4 +1,6 @@
 import json
+import os
+import re
 from pathlib import Path
 from typing import Dict, List
 
@@ -35,7 +37,7 @@ def create_directory(directory_path: str, subdirectory_name: str = None) -> str:
 
     # Si se especificó un nombre para el subdirectorio, crea el subdirectorio
     if subdirectory_name:
-        subdirectory_path = f"{directory_path}/{subdirectory_name}"
+        subdirectory_path = os.path.join(directory_path, subdirectory_name)
         Path(subdirectory_path).mkdir(parents=True, exist_ok=True)
 
         return subdirectory_path
@@ -44,13 +46,34 @@ def create_directory(directory_path: str, subdirectory_name: str = None) -> str:
 
 
 def save_raw_json(json_path: str, json_dict: Dict) -> None:
-    # Guardar la data en bruto en formato JSON
+    """
+    Guarda un diccionario como archivo JSON en la ruta especificada.
+
+    Parameters:
+        json_path (str): Ruta del archivo JSON a guardar.
+
+    Returns:
+        json_dict (Dict): Diccionario con los datos a guardar.
+
+    :return: None
+    """
     with open(json_path, "w") as fp:
         json.dump(json_dict, fp, indent=4)
 
 
 def album_data(playlist_data: List[str]) -> List[Dict]:
-    return [
+    """
+    Toma una lista de datos de una playlist de Spotify y devuelve una lista de
+    diccionarios con información del álbum correspondiente a cada canción.
+
+    Parameters:
+        playlist_data (List[str]): Lista de diccionarios con datos de una playlist de Spotify
+
+    Returns:
+        lista_albums (List[Dict]): Lista de diccionarios con información del álbum de cada canción.
+
+    """
+    lista_albums = [
         {
             "album_id": row["track"]["album"]["id"],
             "name": row["track"]["album"]["name"],
@@ -61,10 +84,22 @@ def album_data(playlist_data: List[str]) -> List[Dict]:
         for row in playlist_data
         if row["track"] is not None
     ]
+    return lista_albums
 
 
 def artist_data(playlist_data: List[str]) -> List[Dict]:
-    return [
+    """
+    Toma una lista de datos de una playlist de Spotify y devuelve una lista de
+    diccionarios con información del artista correspondiente a cada canción.
+
+    Parameters:
+        playlist_data (List[str]): Lista de diccionarios con datos de una playlist de Spotify
+
+    Returns:
+        lista_artistas (List[Dict]): Lista de diccionarios con información del artista de cada canción.
+
+    """
+    lista_artistas = [
         {
             "artist_id": artist["id"],
             "artist_name": artist["name"],
@@ -76,10 +111,22 @@ def artist_data(playlist_data: List[str]) -> List[Dict]:
         if key == "track" and value is not None
         for artist in value["artists"]
     ]
+    return lista_artistas
 
 
 def songs_data(playlist_data: List[str]) -> List[Dict]:
-    return [
+    """
+    Toma una lista de datos de una playlist de Spotify y devuelve una lista de
+    diccionarios con información de cada canción.
+
+    Parameters:
+        playlist_data (list): Lista de diccionarios con datos de una playlist de Spotify
+
+    Returns:
+        lista_canciones (list): Lista de diccionarios con información de cada canción.
+
+    """
+    lista_canciones = [
         {
             "song_id": row["track"]["id"],
             "song_name": row["track"]["name"],
@@ -94,3 +141,4 @@ def songs_data(playlist_data: List[str]) -> List[Dict]:
         for row in playlist_data
         if row["track"] is not None
     ]
+    return lista_canciones
