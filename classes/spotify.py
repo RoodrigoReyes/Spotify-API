@@ -118,6 +118,26 @@ class SpotifyAPI:
                                                  subdirectory_name="parquet_data")  # fmt: skip
 
         # Configurar los parámetros de la consulta
+        playlist_data = self.extract_playlist_data(
+            playlist_id=playlist_id, raw_path=raw_data_path
+        )
+
+        return self.get_model_data(
+            playlist_data=playlist_data, parquet_path=parquet_data_path
+        )
+
+    def extract_playlist_data(self, playlist_id: str, raw_path: str) -> List[Dict]:
+        """
+        Recupera todos los tracks de una playlist de Spotify.
+
+        Parameters:
+            playlist_id (str): ID de la playlist de Spotify.
+
+        Returns:
+            Lista con todos los tracks de la playlist.
+        """
+
+        # Configurar los parámetros de la consulta
         offset, limit = 0, 100
         playlist_data = []
 
@@ -132,7 +152,7 @@ class SpotifyAPI:
             offset += limit
 
             # Guardar la data en bruto en formato JSON
-            raw_data_file_path_temp = f"{raw_data_path}/data_{offset}.json"
+            raw_data_file_path_temp = f"{raw_path}/data_{offset}.json"
             dev.save_raw_json(
                 json_path=raw_data_file_path_temp,
                 json_dict=playlist_tracks
@@ -142,9 +162,7 @@ class SpotifyAPI:
             if playlist_tracks["next"] is None:
                 break
 
-        return self.get_model_data(
-            playlist_data=playlist_data, parquet_path=parquet_data_path
-        )
+        return playlist_data
 
     def get_model_data(self, playlist_data: List[Dict], parquet_path: str) -> None:
         """
