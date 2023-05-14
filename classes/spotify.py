@@ -132,9 +132,10 @@ class SpotifyAPI:
 
         Parameters:
             playlist_id (str): ID de la playlist de Spotify.
+            raw_path (str): Ruta del directorio donde se guardarán los archivos json.
 
         Returns:
-            Lista con todos los tracks de la playlist.
+            playlist_data (str): Lista con todos los tracks de la playlist.
         """
 
         # Configurar los parámetros de la consulta
