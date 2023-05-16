@@ -1,6 +1,5 @@
 import json
 import os
-import re
 from pathlib import Path
 from typing import Dict, List
 
@@ -70,10 +69,10 @@ def album_data(playlist_data: List[str]) -> List[Dict]:
         playlist_data (List[str]): Lista de diccionarios con datos de una playlist de Spotify
 
     Returns:
-        lista_albums (List[Dict]): Lista de diccionarios con información del álbum de cada canción.
+        albums_data (List[Dict]): Lista de diccionarios con información del álbum de cada canción.
 
     """
-    lista_albums = [
+    albums_data = [
         {
             "album_id": row["track"]["album"]["id"],
             "name": row["track"]["album"]["name"],
@@ -84,7 +83,7 @@ def album_data(playlist_data: List[str]) -> List[Dict]:
         for row in playlist_data
         if row["track"] is not None
     ]
-    return lista_albums
+    return albums_data
 
 
 def artist_data(playlist_data: List[str]) -> List[Dict]:
@@ -96,10 +95,10 @@ def artist_data(playlist_data: List[str]) -> List[Dict]:
         playlist_data (List[str]): Lista de diccionarios con datos de una playlist de Spotify
 
     Returns:
-        lista_artistas (List[Dict]): Lista de diccionarios con información del artista de cada canción.
+        artist_data (List[Dict]): Lista de diccionarios con información del artista de cada canción.
 
     """
-    lista_artistas = [
+    artist_data = [
         {
             "artist_id": artist["id"],
             "artist_name": artist["name"],
@@ -111,7 +110,7 @@ def artist_data(playlist_data: List[str]) -> List[Dict]:
         if key == "track" and value is not None
         for artist in value["artists"]
     ]
-    return lista_artistas
+    return artist_data
 
 
 def songs_data(playlist_data: List[str]) -> List[Dict]:
@@ -123,10 +122,10 @@ def songs_data(playlist_data: List[str]) -> List[Dict]:
         playlist_data (list): Lista de diccionarios con datos de una playlist de Spotify
 
     Returns:
-        lista_canciones (list): Lista de diccionarios con información de cada canción.
+        songs_data (list): Lista de diccionarios con información de cada canción.
 
     """
-    lista_canciones = [
+    songs_data = [
         {
             "song_id": row["track"]["id"],
             "song_name": row["track"]["name"],
@@ -141,4 +140,4 @@ def songs_data(playlist_data: List[str]) -> List[Dict]:
         for row in playlist_data
         if row["track"] is not None
     ]
-    return lista_canciones
+    return songs_data
