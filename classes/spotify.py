@@ -33,7 +33,28 @@ class SpotifyAPI:
         except SpotifyOauthError:
             print("No se pudo autenticar con la API de Spotify. Por favor, verifique sus credenciales.")  # fmt: skip
 
-    def get_audio_features(
+    def playlist_info(
+        self,
+        playlist_id: Union[str, List[str]],
+        user: str = None,
+        fields: List[str] = None,
+    ) -> Dict:
+        """
+        Obtiene información sobre una playlist de Spotify.
+
+        Parameters:
+            playlist_id (str): ID de la playlist de Spotify.
+            user (str): Nombre de usuario del propietario de la playlist.
+            fields (List[str]): Lista de campos de la playlist que se deben devolver.
+
+        Returns:
+            Diccionario con la información de la playlist solicitada.
+        """
+        return self.__sp.user_playlist(
+            user=user, playlist_id=playlist_id, fields=fields
+        )
+
+    def audio_features(
         self,
         song_id: Union[str, List[str]],
         ) -> Dict:  # fmt: skip
@@ -63,28 +84,44 @@ class SpotifyAPI:
 
         return audio_features_list
 
-    def get_playlist_info(
-        self,
-        playlist_id: Union[str, List[str]],
-        user: str = None,
-        fields: List[str] = None,
-    ) -> Dict:
+    def model_data(self, playlist_data: List[Dict], parquet_path: str) -> None:
         """
-        Obtiene información sobre una playlist de Spotify.
+        Procesa los datos de la playlist y guarda la información de los álbumes, artistas,
+        canciones y sus características en archivos parquet.
 
         Parameters:
-            playlist_id (str): ID de la playlist de Spotify.
-            user (str): Nombre de usuario del propietario de la playlist.
-            fields (List[str]): Lista de campos de la playlist que se deben devolver.
+            playlist_data (List[Dict]): Lista de diccionarios con la información de los tracks de la playlist.
+            parquet_path (str): Ruta del directorio donde se guardarán los archivos parquet.
 
         Returns:
-            Diccionario con la información de la playlist solicitada.
+            None
         """
-        return self.__sp.user_playlist(
-            user=user, playlist_id=playlist_id, fields=fields
-        )
 
-    def get_playlist_data(self, playlist_id: str) -> None:
+        # Obteniendo informacion de los albumes, artistas y canciones
+        # que estan en la playlist
+        album_df = pd.DataFrame.from_dict(dev.album_data(playlist_data))
+        artist_df = pd.DataFrame.from_dict(dev.artist_data(playlist_data))
+        song_df = pd.DataFrame.from_dict(dev.songs_data(playlist_data))
+
+        # Eliminando duplicados por id
+        album_df = album_df.drop_duplicates(subset="album_id")
+        artist_df = artist_df.drop_duplicates(subset="artist_id")
+        song_df = song_df.drop_duplicates(subset="song_id")
+
+        # Obteniendo las características de cada canción
+        # que se encuentra en la playlist
+        songs_features = self.audio_features(song_id=song_df["song_id"])
+        songs_features_df = pd.DataFrame(songs_features)
+
+        # Guardando archivos
+        album_df.to_parquet(f"{parquet_path}/albums.parquet")
+        artist_df.to_parquet(f"{parquet_path}/artists.parquet")
+        song_df.to_parquet(f"{parquet_path}/songs.parquet")
+        songs_features_df.to_parquet(f"{parquet_path}/songs_features.parquet")
+
+        return
+
+    def playlist_data(self, playlist_id: str) -> None:
         """
         Recupera todos los tracks de una playlist de Spotify.
 
@@ -95,9 +132,9 @@ class SpotifyAPI:
             Lista con todos los tracks de la playlist.
         """
         # Configurar el nombre de la playlist
-        playlist_name = self.get_playlist_info(
-            playlist_id=playlist_id, fields=["name"]
-        )["name"]
+        playlist_name = self.playlist_info(playlist_id=playlist_id, fields=["name"])[
+            "name"
+        ]
 
         # Crear el directorio principal y los subdirectorios
         today_directory_path = dev.create_directory(directory_path="api_data",
@@ -122,7 +159,7 @@ class SpotifyAPI:
             playlist_id=playlist_id, raw_path=raw_data_path
         )
 
-        return self.get_model_data(
+        return self.model_data(
             playlist_data=playlist_data, parquet_path=parquet_data_path
         )
 
@@ -164,40 +201,3 @@ class SpotifyAPI:
                 break
 
         return playlist_data
-
-    def get_model_data(self, playlist_data: List[Dict], parquet_path: str) -> None:
-        """
-        Procesa los datos de la playlist y guarda la información de los álbumes, artistas,
-        canciones y sus características en archivos parquet.
-
-        Parameters:
-            playlist_data (List[Dict]): Lista de diccionarios con la información de los tracks de la playlist.
-            parquet_path (str): Ruta del directorio donde se guardarán los archivos parquet.
-
-        Returns:
-            None
-        """
-
-        # Obteniendo informacion de los albumes, artistas y canciones
-        # que estan en la playlist
-        album_df = pd.DataFrame.from_dict(dev.album_data(playlist_data))
-        artist_df = pd.DataFrame.from_dict(dev.artist_data(playlist_data))
-        song_df = pd.DataFrame.from_dict(dev.songs_data(playlist_data))
-
-        # Eliminando duplicados por id
-        album_df = album_df.drop_duplicates(subset="album_id")
-        artist_df = artist_df.drop_duplicates(subset="artist_id")
-        song_df = song_df.drop_duplicates(subset="song_id")
-
-        # Obteniendo las características de cada canción
-        # que se encuentra en la playlist
-        songs_features = self.get_audio_features(song_id=song_df["song_id"])
-        songs_features_df = pd.DataFrame(songs_features)
-
-        # Guardando archivos
-        album_df.to_parquet(f"{parquet_path}/albums.parquet")
-        artist_df.to_parquet(f"{parquet_path}/artists.parquet")
-        song_df.to_parquet(f"{parquet_path}/songs.parquet")
-        songs_features_df.to_parquet(f"{parquet_path}/songs_features.parquet")
-
-        return
