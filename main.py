@@ -1,5 +1,5 @@
-from classes.spotify import SpotifyAPI
 from classes import dev
+from classes.spotify_v2 import SpotifyAPI
 
 spotify = SpotifyAPI()
 
@@ -19,4 +19,4 @@ if __name__ == "__main__":
         playlist_id = dev.get_id_playlist(playlist_url=url)
 
         # Extraer data de Playlist
-        spotify.get_playlist_data(playlist_id=playlist_id)
+        spotify.playlist_data(playlist_id=playlist_id)

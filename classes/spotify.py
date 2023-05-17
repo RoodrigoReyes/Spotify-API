@@ -33,7 +33,28 @@ class SpotifyAPI:
         except SpotifyOauthError:
             print("No se pudo autenticar con la API de Spotify. Por favor, verifique sus credenciales.")  # fmt: skip
 
-    def get_audio_features(
+    def playlist_info(
+        self,
+        playlist_id: Union[str, List[str]],
+        user: str = None,
+        fields: List[str] = None,
+    ) -> Dict:
+        """
+        Obtiene información sobre una playlist de Spotify.
+
+        Parameters:
+            playlist_id (str): ID de la playlist de Spotify.
+            user (str): Nombre de usuario del propietario de la playlist.
+            fields (List[str]): Lista de campos de la playlist que se deben devolver.
+
+        Returns:
+            Diccionario con la información de la playlist solicitada.
+        """
+        return self.__sp.user_playlist(
+            user=user, playlist_id=playlist_id, fields=fields
+        )
+
+    def audio_features(
         self,
         song_id: Union[str, List[str]],
         ) -> Dict:  # fmt: skip
@@ -63,90 +84,7 @@ class SpotifyAPI:
 
         return audio_features_list
 
-    def get_playlist_info(
-        self,
-        playlist_id: Union[str, List[str]],
-        user: str = None,
-        fields: List[str] = None,
-    ) -> Dict:
-        """
-        Obtiene información sobre una playlist de Spotify.
-
-        Parameters:
-            playlist_id (str): ID de la playlist de Spotify.
-            user (str): Nombre de usuario del propietario de la playlist.
-            fields (List[str]): Lista de campos de la playlist que se deben devolver.
-
-        Returns:
-            Diccionario con la información de la playlist solicitada.
-        """
-        return self.__sp.user_playlist(
-            user=user, playlist_id=playlist_id, fields=fields
-        )
-
-    def get_playlist_data(self, playlist_id: str) -> None:
-        """
-        Recupera todos los tracks de una playlist de Spotify.
-
-        Parameters:
-            playlist_id (str): ID de la playlist de Spotify.
-
-        Returns:
-            Lista con todos los tracks de la playlist.
-        """
-        # Configurar el nombre de la playlist
-        playlist_name = self.get_playlist_info(
-            playlist_id=playlist_id, fields=["name"]
-        )["name"]
-
-        # Crear el directorio principal y los subdirectorios
-        today_directory_path = dev.create_directory(directory_path="api_data",
-                                                    subdirectory_name=TODAY)  # fmt: skip
-
-        # Crear directorios para identificar el dia de ejecucion
-        raw_data_today_path = dev.create_directory(directory_path=today_directory_path,
-                                                   subdirectory_name=playlist_name)  # fmt: skip
-
-        parquet_data_today_path = dev.create_directory(directory_path=today_directory_path,
-                                                       subdirectory_name=playlist_name)  # fmt: skip
-
-        # Crear un subdirectorio con la fecha actual
-        raw_data_path = dev.create_directory(directory_path=raw_data_today_path,
-                                             subdirectory_name="raw_data")  # fmt: skip
-
-        parquet_data_path = dev.create_directory(directory_path=parquet_data_today_path,
-                                                 subdirectory_name="parquet_data")  # fmt: skip
-
-        # Configurar los parámetros de la consulta
-        offset, limit = 0, 100
-        playlist_data = []
-
-        # Recuperar los tracks de la playlist en bloques de tamaño `limit`
-        while True:
-            playlist_tracks = self.__sp.playlist_tracks(
-                playlist_id=playlist_id, offset=offset, limit=limit
-            )
-
-            # Agregar los tracks a la lista de resultados
-            playlist_data += playlist_tracks["items"]
-            offset += limit
-
-            # Guardar la data en bruto en formato JSON
-            raw_data_file_path_temp = f"{raw_data_path}/data_{offset}.json"
-            dev.save_raw_json(
-                json_path=raw_data_file_path_temp,
-                json_dict=playlist_tracks
-            )  # fmt: skip
-
-            # Si no hay más tracks en la playlist, terminar el bucle
-            if playlist_tracks["next"] is None:
-                break
-
-        return self.get_model_data(
-            playlist_data=playlist_data, parquet_path=parquet_data_path
-        )
-
-    def get_model_data(self, playlist_data: List[Dict], parquet_path: str) -> None:
+    def model_data(self, playlist_data: List[Dict], parquet_path: str) -> None:
         """
         Procesa los datos de la playlist y guarda la información de los álbumes, artistas,
         canciones y sus características en archivos parquet.
@@ -172,7 +110,7 @@ class SpotifyAPI:
 
         # Obteniendo las características de cada canción
         # que se encuentra en la playlist
-        songs_features = self.get_audio_features(song_id=song_df["song_id"])
+        songs_features = self.audio_features(song_id=song_df["song_id"])
         songs_features_df = pd.DataFrame(songs_features)
 
         # Guardando archivos
@@ -182,3 +120,84 @@ class SpotifyAPI:
         songs_features_df.to_parquet(f"{parquet_path}/songs_features.parquet")
 
         return
+
+    def playlist_data(self, playlist_id: str) -> None:
+        """
+        Recupera todos los tracks de una playlist de Spotify.
+
+        Parameters:
+            playlist_id (str): ID de la playlist de Spotify.
+
+        Returns:
+            Lista con todos los tracks de la playlist.
+        """
+        # Configurar el nombre de la playlist
+        playlist_name = self.playlist_info(playlist_id=playlist_id, fields=["name"])[
+            "name"
+        ]
+
+        # Crear el directorio principal y los subdirectorios
+        today_directory_path = dev.create_directory(directory_path="api_data",
+                                                    subdirectory_name=TODAY)  # fmt: skip
+
+        # Crear directorios para identificar el dia de ejecucion
+        raw_data_today_path = dev.create_directory(directory_path=today_directory_path,
+                                                   subdirectory_name=playlist_name)  # fmt: skip
+
+        parquet_data_today_path = dev.create_directory(directory_path=today_directory_path,
+                                                       subdirectory_name=playlist_name)  # fmt: skip
+
+        # Crear un subdirectorio con la fecha actual
+        raw_data_path = dev.create_directory(directory_path=raw_data_today_path,
+                                             subdirectory_name="raw_data")  # fmt: skip
+
+        parquet_data_path = dev.create_directory(directory_path=parquet_data_today_path,
+                                                 subdirectory_name="parquet_data")  # fmt: skip
+
+        # Configurar los parámetros de la consulta
+        playlist_data = self.extract_playlist_data(
+            playlist_id=playlist_id, raw_path=raw_data_path
+        )
+
+        return self.model_data(
+            playlist_data=playlist_data, parquet_path=parquet_data_path
+        )
+
+    def extract_playlist_data(self, playlist_id: str, raw_path: str) -> List[Dict]:
+        """
+        Recupera todos los tracks de una playlist de Spotify.
+
+        Parameters:
+            playlist_id (str): ID de la playlist de Spotify.
+            raw_path (str): Ruta del directorio donde se guardarán los archivos json.
+
+        Returns:
+            playlist_data (str): Lista con todos los tracks de la playlist.
+        """
+
+        # Configurar los parámetros de la consulta
+        offset, limit = 0, 100
+        playlist_data = []
+
+        # Recuperar los tracks de la playlist en bloques de tamaño `limit`
+        while True:
+            playlist_tracks = self.__sp.playlist_tracks(
+                playlist_id=playlist_id, offset=offset, limit=limit
+            )
+
+            # Agregar los tracks a la lista de resultados
+            playlist_data += playlist_tracks["items"]
+            offset += limit
+
+            # Guardar la data en bruto en formato JSON
+            raw_data_file_path_temp = f"{raw_path}/data_{offset}.json"
+            dev.save_raw_json(
+                json_path=raw_data_file_path_temp,
+                json_dict=playlist_tracks
+            )  # fmt: skip
+
+            # Si no hay más tracks en la playlist, terminar el bucle
+            if playlist_tracks["next"] is None:
+                break
+
+        return playlist_data
