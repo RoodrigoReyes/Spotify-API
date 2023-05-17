@@ -1,7 +1,30 @@
 import json
 import os
+import re
 from pathlib import Path
 from typing import Dict, List
+
+
+def check_date():
+    """
+    Solicita al usuario que ingrese una fecha en formato YYYY-MM-DD utilizando regex
+    hasta que se ingrese una fecha válida.
+
+    Returns:
+    fecha (str): Una fecha en formato YYYY-MM-DD
+
+    """
+    while True:
+        fecha = input("Ingrese una fecha en formato YYYY-MM-DD: ")
+
+        # Verificar si la fecha cumple con el formato YYYY-MM-DD utilizando regex
+        patron = re.compile("^\d{4}-\d{2}-\d{2}$")
+        if patron.match(fecha):
+            return fecha
+        else:
+            print(
+                "La fecha ingresada no cumple con el formato YYYY-MM-DD. Intente nuevamente."
+            )
 
 
 def get_id_playlist(playlist_url: str) -> str:
