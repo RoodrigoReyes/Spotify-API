@@ -1,13 +1,14 @@
 import re
 from typing import Dict
 
+import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
 from classes import dev
 
 
-def get_billboard_hot_100(date: bool = True) -> Dict:
+def billboard_hot_100(date: bool = False) -> Dict:
     """
     Devuelve un diccionario con las 100 canciones más populares en Billboard en una fecha específica o en la fecha actual.
 
@@ -21,7 +22,7 @@ def get_billboard_hot_100(date: bool = True) -> Dict:
 
     # Si date es True, se obtiene la fecha actual
     if date:
-        date = dev.validar_fecha()
+        date = dev.check_date()
         url = f"https://www.billboard.com/charts/hot-100/{date}"
 
     # Si date es False, se usa la url de la fecha actual
@@ -66,4 +67,8 @@ def get_billboard_hot_100(date: bool = True) -> Dict:
     songs.insert(0, top_one_song)
 
     # Se crea un diccionario con las claves como nombres de las canciones y los valores como nombres de los artistas
-    return dict(zip(songs, artist))
+    data = dict(zip(songs, artist))
+
+    billboard_df = pd.DataFrame(data.items(), columns=["song", "artist"])
+
+    return billboard_df
