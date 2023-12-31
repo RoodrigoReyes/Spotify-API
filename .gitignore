@@ -1,7 +1,8 @@
 venv/ 
-.cache
-api_data/
+config/
 credentials/
+api_data/
+.cache
 __pycache__/
 .cache-broomspune
 *.ipynb
