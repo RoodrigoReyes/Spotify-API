@@ -1,0 +1,7 @@
+venv/ 
+.cache
+api_data/
+credentials/
+__pycache__/
+.cache-broomspune
+*.ipynb
